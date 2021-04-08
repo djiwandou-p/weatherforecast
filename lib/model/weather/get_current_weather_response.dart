@@ -8,7 +8,7 @@ class GetCurrentWeatherResponse {
 
   GetCurrentWeatherResponse.fromJson(Map<String, dynamic> json) {
     message = json['message'];
-    cod = json['cod'];
+    cod = (json['cod'] is int) ? json['cod'].toString() : json['cod'];
     count = json['count'];
     if (json['list'] != null) {
       currentWeatherData = [];
@@ -117,20 +117,20 @@ class Coord {
 class Main {
   double temp;
   double feelsLike;
-  int tempMin;
+  double tempMin;
   double tempMax;
-  int pressure;
-  int humidity;
+  double pressure;
+  double humidity;
 
   Main({this.temp, this.feelsLike, this.tempMin, this.tempMax, this.pressure, this.humidity});
 
   Main.fromJson(Map<String, dynamic> json) {
     temp = json['temp'];
     feelsLike = json['feels_like'];
-    tempMin = json['temp_min'];
+    humidity = (json['temp_min'] is int) ? double.tryParse(json['temp_min'].toString()) : json['temp_min'];
     tempMax = json['temp_max'];
-    pressure = json['pressure'];
-    humidity = json['humidity'];
+    pressure = (json['pressure'] is int) ? double.tryParse(json['pressure'].toString()) : json['pressure'];
+    humidity = (json['humidity'] is int) ? double.tryParse(json['humidity'].toString()) : json['humidity'];
   }
 
   Map<String, dynamic> toJson() {
@@ -147,13 +147,13 @@ class Main {
 
 class Wind {
   double speed;
-  int deg;
+  double deg;
 
   Wind({this.speed, this.deg});
 
   Wind.fromJson(Map<String, dynamic> json) {
     speed = json['speed'];
-    deg = json['deg'];
+    deg = (json['deg'] is int) ? double.tryParse(json['deg'].toString()) : json['deg'];
   }
 
   Map<String, dynamic> toJson() {

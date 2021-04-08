@@ -14,27 +14,34 @@ import 'package:weatherforecast/util/function.dart';
 class WeatherClient {
   final String units;
   final String appId;
-  WeatherClient({this.units = "imperial", this.appId = Env.openWeatherApi});
+  WeatherClient({this.units = "metric", this.appId = Env.openWeatherApiKey});
 
   Future<GetCurrentWeatherResponse> getCurrentWeather(GetCurrentWeatherRequest _request) async {
+    _request.appid = appId;
+    _request.units = units;
     String url = "${Env.openWeatherApi}/data/2.5/find";
     url = url + getQueryString(_request.toJson());
-    _request.appid = appId;
     developer.log(url, name: "Request");
     return await get(Uri.parse(url), headers: Headers.header).timeout(const Duration(seconds: 5)).then((response) {
       developer.log(response.body, name: "Response");
       return GetCurrentWeatherResponse.fromJson(json.decode(response.body));
+    }).catchError((ex) {
+      print(ex.toString());
     });
   }
 
   Future<GetWeathersResponse> getWeathers(GetWeathersRequest _request) async {
+    _request.appid = appId;
+    _request.units = units;
     String url = "${Env.openWeatherApi}/data/2.5/onecall";
     url = url + getQueryString(_request.toJson());
-    _request.appid = appId;
     developer.log(url, name: "Request");
     return await get(Uri.parse(url), headers: Headers.header).timeout(const Duration(seconds: 5)).then((response) {
       developer.log(response.body, name: "Response");
       return GetWeathersResponse.fromJson(json.decode(response.body));
+    }).catchError((ex) {
+      print(ex.toString());
     });
+    ;
   }
 }

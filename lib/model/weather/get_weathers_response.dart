@@ -69,8 +69,8 @@ class Daily {
       });
     }
     clouds = json['clouds'];
-    pop = json['pop'];
-    uvi = json['uvi'];
+    pop = (json['pop'] is double) ? json['pop'] : double.tryParse(json['pop'].toString());
+    uvi = (json['uvi'] is double) ? json['uvi'] : double.tryParse(json['uvi'].toString());
   }
 
   Map<String, dynamic> toJson() {
