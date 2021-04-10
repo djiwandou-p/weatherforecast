@@ -4,7 +4,7 @@ import 'package:weatherforecast/config/themes/color_schemes.dart';
 class Themes {
   static ThemeData defaultThemes(BuildContext context) {
     return ThemeData(
-      colorScheme: ColorSchemes.ligthColor(),
+      colorScheme: ColorSchemes.ligthColor,
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -30,7 +30,8 @@ class Themes {
         style: ButtonStyle(
           backgroundColor: MaterialStateProperty.resolveWith<Color>(
             (Set<MaterialState> states) {
-              if (states.contains(MaterialState.pressed)) return Theme.of(context).colorScheme.primary.withOpacity(0.6);
+              if (states.contains(MaterialState.pressed))
+                return Theme.of(context).colorScheme.primary.withOpacity(0.6);
               return Theme.of(context).colorScheme.primary;
             },
           ),

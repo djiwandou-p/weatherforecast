@@ -1,4 +1,5 @@
 import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
 
 String getQueryString(Map params, {String prefix: '&', bool inRecursion: false}) {
   String query = '';
@@ -18,28 +19,32 @@ String getQueryString(Map params, {String prefix: '&', bool inRecursion: false})
   return query;
 }
 
+String doubleTrimmer(double number) {
+  String _temp = number.toString();
+  List<String> _splitted = _temp.split('.');
+  int _secondary = int.tryParse(_splitted[1]) ?? 0;
+  return (_secondary != 0) ? number.toString() : _temp.split('.')[0];
+}
+
+String dateToReadable(DateTime date) => DateFormat("yyyy-MM-dd").format(date);
+
 Future<Position> getPosition() async {
   bool serviceEnabled;
   LocationPermission permission;
 
   serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  if (!serviceEnabled) return Future.error('GPS Tidak aktif');
+  if (!serviceEnabled) return Future.error('GPS not active');
 
   permission = await Geolocator.checkPermission();
   if (permission == LocationPermission.denied) {
     permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error('Tidak dapat melanjutkan, Akses lokasi tidak di izinkan secara permanen. Silahkan atur / konfigurasi izin lokasi terlebih dahulu');
-    }
-
-    if (permission == LocationPermission.denied) {
-      // Permissions are denied, next time you could try
-      // requesting permissions again (this is also where
-      // Android's shouldShowRequestPermissionRationale
-      // returned true. According to Android guidelines
-      // your App should show an explanatory UI now.
-      return Future.error('Location permissions are denied');
-    }
+    if (permission == LocationPermission.deniedForever)
+      return Future.error(
+          'Permanently denied, cannot get a permission. Ensure the GPS Access is allowed');
+    if (permission == LocationPermission.denied)
+      return Future.error('Location access permissions are denied');
   }
   return await Geolocator.getCurrentPosition();
 }
+
+DateTime unixToDate(int unix) => DateTime.fromMillisecondsSinceEpoch(unix * 1000);

@@ -8,7 +8,7 @@ class GetCurrentWeatherResponse {
 
   GetCurrentWeatherResponse.fromJson(Map<String, dynamic> json) {
     message = json['message'];
-    cod = (json['cod'] is int) ? json['cod'].toString() : json['cod'];
+    cod = json['cod'];
     count = json['count'];
     if (json['list'] != null) {
       currentWeatherData = [];
@@ -38,12 +38,23 @@ class CurrentWeatherData {
   int dt;
   Wind wind;
   Sys sys;
-  int rain;
+  Rain rain;
   Snow snow;
   Clouds clouds;
   List<Weather> weather;
 
-  CurrentWeatherData({this.id, this.name, this.coord, this.main, this.dt, this.wind, this.sys, this.rain, this.snow, this.clouds, this.weather});
+  CurrentWeatherData(
+      {this.id,
+      this.name,
+      this.coord,
+      this.main,
+      this.dt,
+      this.wind,
+      this.sys,
+      this.rain,
+      this.snow,
+      this.clouds,
+      this.weather});
 
   CurrentWeatherData.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -53,7 +64,7 @@ class CurrentWeatherData {
     dt = json['dt'];
     wind = json['wind'] != null ? new Wind.fromJson(json['wind']) : null;
     sys = json['sys'] != null ? new Sys.fromJson(json['sys']) : null;
-    rain = json['rain'];
+    rain = json['rain'] != null ? new Rain.fromJson(json['rain']) : null;
     snow = json['snow'] != null ? new Snow.fromJson(json['snow']) : null;
     clouds = json['clouds'] != null ? new Clouds.fromJson(json['clouds']) : null;
     if (json['weather'] != null) {
@@ -127,10 +138,13 @@ class Main {
   Main.fromJson(Map<String, dynamic> json) {
     temp = json['temp'];
     feelsLike = json['feels_like'];
-    humidity = (json['temp_min'] is int) ? double.tryParse(json['temp_min'].toString()) : json['temp_min'];
+    humidity =
+        (json['temp_min'] is int) ? double.tryParse(json['temp_min'].toString()) : json['temp_min'];
     tempMax = json['temp_max'];
-    pressure = (json['pressure'] is int) ? double.tryParse(json['pressure'].toString()) : json['pressure'];
-    humidity = (json['humidity'] is int) ? double.tryParse(json['humidity'].toString()) : json['humidity'];
+    pressure =
+        (json['pressure'] is int) ? double.tryParse(json['pressure'].toString()) : json['pressure'];
+    humidity =
+        (json['humidity'] is int) ? double.tryParse(json['humidity'].toString()) : json['humidity'];
   }
 
   Map<String, dynamic> toJson() {
@@ -141,6 +155,22 @@ class Main {
     data['temp_max'] = this.tempMax;
     data['pressure'] = this.pressure;
     data['humidity'] = this.humidity;
+    return data;
+  }
+}
+
+class Rain {
+  double d1h;
+
+  Rain({this.d1h});
+
+  Rain.fromJson(Map<String, dynamic> json) {
+    d1h = json['1h'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['1h'] = this.d1h;
     return data;
   }
 }

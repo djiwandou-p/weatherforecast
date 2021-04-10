@@ -1,3 +1,5 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:geolocator/geolocator.dart';
@@ -32,12 +34,17 @@ class _WeatherState extends State<Weather> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Weather display"),
+        backgroundColor: Colors.transparent,
       ),
+      extendBodyBehindAppBar: true,
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            currentWeather(context),
-          ],
+        child: SafeArea(
+          child: Column(
+            children: [
+              currentWeather(context),
+              weathers(context),
+            ],
+          ),
         ),
       ),
     );
@@ -48,11 +55,14 @@ class _WeatherState extends State<Weather> {
       padding: const EdgeInsets.all(15),
       child: Row(
         children: [
-          summaryCard(context, "Temperature", "${currentWeatherData.first.main.temp.toString()} \u2103"),
+          summaryCard(
+              context, "Temperature", "${currentWeatherData.first.main.temp.toString()} \u2103"),
           SizedBox(width: 15),
-          summaryCard(context, "Humidity", "${currentWeatherData.first.main.humidity.toString()} %"),
+          summaryCard(
+              context, "Humidity", "${currentWeatherData.first.main.humidity.toString()} %"),
           SizedBox(width: 15),
-          summaryCard(context, "Air Pressure", "${currentWeatherData.first.main.pressure.toString()} Bar"),
+          summaryCard(
+              context, "Air Pressure", "${currentWeatherData.first.main.pressure.toString()} Bar"),
         ],
       ),
     );
@@ -101,6 +111,152 @@ class _WeatherState extends State<Weather> {
     );
   }
 
+  Widget hourlyInformation(BuildContext context, List<Hourly> hourly) {
+    return Container(
+      height: 250,
+      width: double.maxFinite,
+      padding: EdgeInsets.all(15),
+      margin: EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Last 7 hours",
+            style: Theme.of(context).textTheme.bodyText1.copyWith(
+                  fontSize: 18,
+                ),
+          ),
+          SizedBox(height: 15),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: BarChart(
+                BarChartData(
+                  titlesData: FlTitlesData(
+                    show: true,
+                    bottomTitles: SideTitles(
+                      showTitles: true,
+                      getTextStyles: (value) => const TextStyle(
+                        color: Colors.black,
+                        fontSize: 14,
+                      ),
+                      margin: 16,
+                      getTitles: (double value) => "${doubleTrimmer(value)}:00",
+                    ),
+                    leftTitles: SideTitles(
+                      margin: 15,
+                      showTitles: true,
+                      interval: 5,
+                      getTextStyles: (value) => const TextStyle(
+                        color: Colors.black,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  barTouchData: BarTouchData(
+                    touchTooltipData: BarTouchTooltipData(
+                      tooltipBgColor: Colors.blue[900],
+                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                        return BarTooltipItem(
+                          "${unixToDate(hourly[groupIndex].dt).hour}:00, Temperature ${hourly[groupIndex].temp}\u2103",
+                          TextStyle(color: Colors.white),
+                        );
+                      },
+                    ),
+                  ),
+                  borderData: FlBorderData(show: false),
+                  barGroups: hourly
+                      .map(
+                        (item) => BarChartGroupData(
+                          x: unixToDate(item.dt).hour,
+                          barRods: [
+                            BarChartRodData(
+                              colors: [Colors.blue],
+                              width: 15,
+                              y: item.temp,
+                            ),
+                          ],
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget weatherHistory(BuildContext context, List<Daily> daily) {
+    return Container(
+      width: double.maxFinite,
+      padding: EdgeInsets.all(15),
+      margin: EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: ListView.separated(
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        itemCount: daily.length,
+        separatorBuilder: (context, index) => Divider(),
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                CachedNetworkImage(
+                  imageUrl:
+                      "http://openweathermap.org/img/wn/${daily[index].weather.first.icon}@2x.png",
+                  height: 50,
+                  width: 50,
+                ),
+                Text(
+                  dateToReadable(
+                    unixToDate(daily[index].dt),
+                  ),
+                ),
+                Text(
+                  "${daily[index].temp.day}\u2103",
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget weathers(BuildContext context) {
+    return FutureBuilder<GetWeathersResponse>(
+      future: getWeathersResponse,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          List<Hourly> hourly = snapshot.data.hourly.reversed.toList();
+          List<Daily> daily = snapshot.data.daily.reversed.toList();
+          hourly = hourly.getRange(0, 7).toList();
+          daily = daily.getRange(0, 7).toList();
+          return Column(
+            children: [
+              hourlyInformation(context, hourly),
+              weatherHistory(context, daily),
+            ],
+          );
+        }
+
+        if (snapshot.hasError) return Text("There is an error");
+        return Center(child: CircularProgressIndicator());
+      },
+    );
+  }
+
   Future<void> initialFetch(BuildContext context) async {
     Position _position = await getPosition();
     fetchCurrentWeather(context, _position);
@@ -108,14 +264,16 @@ class _WeatherState extends State<Weather> {
   }
 
   Future<void> fetchCurrentWeather(BuildContext context, Position position) async {
-    GetCurrentWeatherRequest _request = new GetCurrentWeatherRequest(lat: position.latitude, lon: position.longitude, cnt: 1);
+    GetCurrentWeatherRequest _request =
+        new GetCurrentWeatherRequest(lat: position.latitude, lon: position.longitude, cnt: 1);
     setState(() {
       getCurrentWeatherResponse = weatherClient.getCurrentWeather(_request);
     });
   }
 
   Future<void> fetchWeathers(BuildContext context, Position position) async {
-    GetWeathersRequest _request = new GetWeathersRequest(lat: position.latitude, lon: position.longitude, exclude: "current,minutely,hourly");
+    GetWeathersRequest _request = new GetWeathersRequest(
+        lat: position.latitude, lon: position.longitude, exclude: "current,minutely");
     setState(() {
       getWeathersResponse = weatherClient.getWeathers(_request);
     });

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ColorSchemes {
-  static ColorScheme ligthColor() {
+  static ColorScheme get ligthColor {
     return ColorScheme.light(
       brightness: Brightness.light,
       primary: Colors.blue,

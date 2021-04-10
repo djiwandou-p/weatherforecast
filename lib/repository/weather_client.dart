@@ -22,7 +22,9 @@ class WeatherClient {
     String url = "${Env.openWeatherApi}/data/2.5/find";
     url = url + getQueryString(_request.toJson());
     developer.log(url, name: "Request");
-    return await get(Uri.parse(url), headers: Headers.header).timeout(const Duration(seconds: 5)).then((response) {
+    return await get(Uri.parse(url), headers: Headers.header)
+        .timeout(const Duration(seconds: 5))
+        .then((response) {
       developer.log(response.body, name: "Response");
       return GetCurrentWeatherResponse.fromJson(json.decode(response.body));
     }).catchError((ex) {
@@ -36,12 +38,13 @@ class WeatherClient {
     String url = "${Env.openWeatherApi}/data/2.5/onecall";
     url = url + getQueryString(_request.toJson());
     developer.log(url, name: "Request");
-    return await get(Uri.parse(url), headers: Headers.header).timeout(const Duration(seconds: 5)).then((response) {
+    return await get(Uri.parse(url), headers: Headers.header)
+        .timeout(const Duration(seconds: 5))
+        .then((response) {
       developer.log(response.body, name: "Response");
       return GetWeathersResponse.fromJson(json.decode(response.body));
     }).catchError((ex) {
       print(ex.toString());
     });
-    ;
   }
 }
