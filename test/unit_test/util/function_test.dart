@@ -12,17 +12,38 @@ void main() {
       String _result = "${Env.openWeatherApi}/data/2.5/find";
       _result = _result + getQueryString(_request.toJson());
       String _expected =
-          "https://api.openweathermap.org/data/2.5/find?lat=-6.9229017&lon=107.6043167&cnt=1&appid=d88af5b3d171caf9614c8c3b9fa66e6b&units=metric";
+          "https://api.openweathermap.org/data/2.5/find?lat=-6.9806453&lon=107.524747&cnt=1";
       expect(_result, _expected);
     });
     test('Convert weather history request to param', () async {
-      GetWeathersRequest _request =
-          new GetWeathersRequest(lat: -6.9806453, lon: 107.524747, exclude: "current,minutely");
-      String _result = "${Env.openWeatherApi}/data/2.5/find";
+      GetWeathersRequest _request = new GetWeathersRequest(
+          lat: -6.9806453, lon: 107.524747, exclude: "current,minutely", units: "metric");
+      String _result = "${Env.openWeatherApi}/data/2.5/onecall";
       _result = _result + getQueryString(_request.toJson());
       String _expected =
-          "https://api.openweathermap.org/data/2.5/onecall?lat=-6.9229017&lon=107.6043167&exclude=current,minutely&appid=d88af5b3d171caf9614c8c3b9fa66e6b&units=metric";
+          "https://api.openweathermap.org/data/2.5/onecall?lat=-6.9806453&lon=107.524747&exclude=current,minutely&units=metric";
       expect(_result, _expected);
+    });
+  });
+
+  group("Test double trimmer", () {
+    test('Test with 0 after . (2.0)', () async {
+      String _result = doubleTrimmer(2.0);
+      expect(_result, "2");
+    });
+    test('Test with > 0 after . (2.1)', () async {
+      String _result = doubleTrimmer(2.1);
+      expect(_result, "2.1");
+    });
+  });
+  group("Test double trimmer", () {
+    test('Test with 0 after . (2.0)', () async {
+      String _result = doubleTrimmer(2.0);
+      expect(_result, "2");
+    });
+    test('Test with > 0 after . (2.1)', () async {
+      String _result = doubleTrimmer(2.1);
+      expect(_result, "2.1");
     });
   });
 }
