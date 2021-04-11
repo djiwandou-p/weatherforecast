@@ -3,10 +3,12 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:weatherforecast/model/weather/get_current_weather_request.dart';
 import 'package:weatherforecast/model/weather/get_current_weather_response.dart';
 import 'package:weatherforecast/model/weather/get_weathers_request.dart';
 import 'package:weatherforecast/model/weather/get_weathers_response.dart';
+import 'package:weatherforecast/presentation/widgets/block.dart';
 import 'package:weatherforecast/repository/weather_client.dart';
 import 'package:weatherforecast/util/function.dart';
 
@@ -34,25 +36,84 @@ class _WeatherState extends State<Weather> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Weather display"),
-        backgroundColor: Colors.transparent,
       ),
-      extendBodyBehindAppBar: true,
-      body: SingleChildScrollView(
-        child: SafeArea(
-          child: Column(
-            children: [
-              currentWeather(context),
-              weathers(context),
-            ],
+      body: RefreshIndicator(
+        onRefresh: () => refreshWeather(context),
+        child: SingleChildScrollView(
+          child: SafeArea(
+            child: Column(
+              children: [
+                currentWeather(context),
+                weathers(context),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
+  Widget summaryPlaceholder() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(15, 15, 15, 7.5),
+          child: Row(
+            children: [
+              Expanded(
+                child: Block(
+                  height: 60,
+                  width: double.maxFinite,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              SizedBox(width: 15),
+              Expanded(
+                child: Block(
+                  height: 60,
+                  width: double.maxFinite,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              SizedBox(width: 15),
+              Expanded(
+                child: Block(
+                  height: 60,
+                  width: double.maxFinite,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ],
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget hourlyPlaceholder(BuildContext context) {
+    return Column(
+      children: [
+        Block(
+          height: 250,
+          width: double.maxFinite,
+          padding: EdgeInsets.all(15),
+          margin: EdgeInsets.fromLTRB(15, 7.5, 15, 7.5),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        Block(
+          height: 400,
+          width: double.maxFinite,
+          padding: EdgeInsets.all(15),
+          margin: EdgeInsets.fromLTRB(15, 7.5, 15, 15),
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ],
+    );
+  }
+
   Widget summaryInfo(BuildContext context, List<CurrentWeatherData> currentWeatherData) {
     return Padding(
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.fromLTRB(15, 15, 15, 7.5),
       child: Row(
         children: [
           summaryCard(
@@ -97,16 +158,13 @@ class _WeatherState extends State<Weather> {
     return FutureBuilder<GetCurrentWeatherResponse>(
       future: getCurrentWeatherResponse,
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return Column(
-            children: [
-              summaryInfo(context, snapshot.data.currentWeatherData),
-            ],
-          );
-        }
-
-        if (snapshot.hasError) return Text("There is an error");
-        return Center(child: CircularProgressIndicator());
+        if (snapshot.hasData) return summaryInfo(context, snapshot.data.currentWeatherData);
+        if (snapshot.hasError) return summaryPlaceholder();
+        return Shimmer.fromColors(
+          baseColor: Colors.grey[200],
+          highlightColor: Colors.white,
+          child: summaryPlaceholder(),
+        );
       },
     );
   }
@@ -116,7 +174,7 @@ class _WeatherState extends State<Weather> {
       height: 250,
       width: double.maxFinite,
       padding: EdgeInsets.all(15),
-      margin: EdgeInsets.all(15),
+      margin: const EdgeInsets.symmetric(vertical: 7.5, horizontal: 15),
       decoration: BoxDecoration(
         color: Colors.grey[50],
         borderRadius: BorderRadius.circular(10),
@@ -196,7 +254,7 @@ class _WeatherState extends State<Weather> {
     return Container(
       width: double.maxFinite,
       padding: EdgeInsets.all(15),
-      margin: EdgeInsets.all(15),
+      margin: EdgeInsets.fromLTRB(15, 7.5, 15, 15),
       decoration: BoxDecoration(
         color: Colors.grey[50],
         borderRadius: BorderRadius.circular(10),
@@ -212,16 +270,30 @@ class _WeatherState extends State<Weather> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                CachedNetworkImage(
-                  imageUrl:
-                      "http://openweathermap.org/img/wn/${daily[index].weather.first.icon}@2x.png",
-                  height: 50,
-                  width: 50,
-                ),
-                Text(
-                  dateToReadable(
-                    unixToDate(daily[index].dt),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    CachedNetworkImage(
+                      imageUrl:
+                          "https://openweathermap.org/img/wn/${daily[index].weather.first.icon}@2x.png",
+                      height: 50,
+                      width: 50,
+                    ),
+                    SizedBox(width: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          dateToReadable(
+                            unixToDate(daily[index].dt),
+                          ),
+                          style: Theme.of(context).textTheme.bodyText1,
+                        ),
+                        Text(
+                            "${daily[index].temp.min.toString()}\u2103 - ${daily[index].temp.max.toString()}\u2103")
+                      ],
+                    ),
+                  ],
                 ),
                 Text(
                   "${daily[index].temp.day}\u2103",
@@ -252,7 +324,15 @@ class _WeatherState extends State<Weather> {
         }
 
         if (snapshot.hasError) return Text("There is an error");
-        return Center(child: CircularProgressIndicator());
+        return Shimmer.fromColors(
+          baseColor: Colors.grey[200],
+          highlightColor: Colors.white,
+          child: Column(
+            children: [
+              hourlyPlaceholder(context),
+            ],
+          ),
+        );
       },
     );
   }
@@ -277,5 +357,9 @@ class _WeatherState extends State<Weather> {
     setState(() {
       getWeathersResponse = weatherClient.getWeathers(_request);
     });
+  }
+
+  Future<void> refreshWeather(BuildContext context) async {
+    initialFetch(context);
   }
 }

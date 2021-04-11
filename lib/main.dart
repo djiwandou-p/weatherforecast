@@ -8,7 +8,8 @@ import 'package:weatherforecast/presentation/pages/weather.dart';
 void main() {
   runApp(MyApp());
   SystemChrome.setSystemUIOverlayStyle(
-    SystemUiOverlayStyle(statusBarColor: Colors.transparent, statusBarIconBrightness: Brightness.dark),
+    SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent, statusBarIconBrightness: Brightness.dark),
   );
 }
 
@@ -56,7 +57,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 style: Theme.of(context).textTheme.headline1,
               ),
               SizedBox(height: 10),
-              Text("This application is being made by dwi kurnianto mulyadien, to pass CAD-IT Consultant competency test. This application has 2 main feature, sequential program, and weather display"),
+              Text(
+                  "This application is being made by dwi kurnianto mulyadien, to pass CAD-IT Consultant competency test. This application has 2 main feature, sequential program, and weather display"),
               SizedBox(height: 15),
               TextButton(
                 onPressed: () {
