@@ -6,6 +6,36 @@ class GetCurrentWeatherResponse {
 
   GetCurrentWeatherResponse({this.message, this.cod, this.count, this.currentWeatherData});
 
+  static const Map<String, dynamic> exampleResponse = {
+    "message": "accurate",
+    "cod": "200",
+    "count": 1,
+    "list": [
+      {
+        "id": 1636125,
+        "name": "Margahayukencana",
+        "coord": {"lat": -6.9708, "lon": 107.5675},
+        "main": {
+          "temp": 23.33,
+          "feels_like": 27.31,
+          "temp_min": 23.33,
+          "temp_max": 23.33,
+          "pressure": 1012,
+          "humidity": 88
+        },
+        "dt": 1618150162,
+        "wind": {"speed": 0.45, "deg": 12},
+        "sys": {"country": "ID"},
+        "rain": null,
+        "snow": null,
+        "clouds": {"all": 92},
+        "weather": [
+          {"id": 804, "main": "Clouds", "description": "overcast clouds", "icon": "04n"}
+        ]
+      }
+    ]
+  };
+
   GetCurrentWeatherResponse.fromJson(Map<String, dynamic> json) {
     message = json['message'];
     cod = json['cod'];

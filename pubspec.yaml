@@ -34,6 +34,7 @@ dependencies:
   fl_chart: ^0.35.0
   cached_network_image: ^3.0.0
   shimmer: ^1.1.2
+  mockito: ^4.1.4
 
 dev_dependencies:
   flutter_test:
